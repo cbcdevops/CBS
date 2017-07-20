@@ -11,7 +11,8 @@ public class Application {
 
     @RequestMapping("/")
     public String home() {
-        return "Hello Docker World";
+
+        return "Hello Canal Barrage. This response is from a CanalBarage Service " ;
     }
 
     public static void main(String[] args) {
