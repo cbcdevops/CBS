@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "centos/7"
-  config.vm.hostname="CB-HOST"
+  config.vm.hostname="CBS-HOST"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -52,10 +52,11 @@ Vagrant.configure("2") do |config|
   #
    config.vm.provider "virtualbox" do |vb|
   #   # Display the VirtualBox GUI when booting the machine
-     vb.gui = true
+  #   vb.gui = true
   #
   #   # Customize the amount of memory on the VM:
-     vb.memory = "2048"
+	 vb.cpus = 2
+     vb.memory = "3072"
    end
   #
   # View the documentation for the provider you are using for more
@@ -64,8 +65,90 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+   config.vm.provision "shell", inline: <<-SHELL
+    sudo yum check-update
+    sudo yum makecache fast    
+    echo '************************************************************'
+    echo '**************** Installing GIT ****************************'
+	echo '************************************************************'	
+    sudo yum install -y git
+	sudo yum install -y maven	
+	if yum list installed docker
+    then
+    echo '************************************************************'
+    echo '**************** Removing old version of Docker ************'
+	echo '************************************************************'	
+	  sudo systemctl stop docker
+      sudo yum remove docker \
+                 docker-common \
+                 docker-selinux \
+                 docker-engine
+    fi
+    if yum list installed docker-ce-stable
+    then
+    echo '###### INFO: Docker already installed ####################'
+    else
+	echo '************************************************************'
+    echo '*** Installing latest version of Docker Community Edition *****'
+	echo '************************************************************'	      
+      yum install -y yum-utils device-mapper-persistent-data lvm2
+      curl -fsSL https://get.docker.com/ | sh
+      systemctl start docker
+      systemctl status docker
+      systemctl enable docker
+    fi
+	echo '###### INFO: Adding Vagrant to Docker ######################'
+    sudo usermod -aG docker vagrant	
+    echo '************************************************************'
+    echo '**************** Installing Bluemix CLI ********************'
+	echo '************************************************************'	
+    sudo curl -fsSL https://clis.ng.bluemix.net/install/linux | sh
+	echo '************************************************************'
+    echo '**************** Installing kubectl ************************'
+	echo '************************************************************'		
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/linux/amd64/kubectl
+	chmod +x ./kubectl
+	mv ./kubectl /usr/local/bin/kubectl
+	SHELL
+	
+	config.vm.provision "shell", inline: <<-SHELL, privileged: false
+    PLUGINS=$(bx plugin list)
+    if echo $PLUGINS | grep dev
+    then
+      bx plugin update dev -r Bluemix
+    else
+	  echo '************************************************************'
+      echo '************** Installing Bluemix dev plugin ***************'
+	  echo '************************************************************'
+      bx plugin install dev -r Bluemix
+    fi
+    if echo $PLUGINS | grep container-service
+    then
+      bx plugin update container-service -r Bluemix
+    else
+	  echo '************************************************************' 	
+      echo '*********** Installing Bluemix container-service plugin ****'
+	  echo '************************************************************'
+      bx plugin install container-service -r Bluemix
+    fi
+    
+    if echo $PLUGINS | grep container-registry
+    then
+      bx plugin update container-registry -r Bluemix
+    else
+	  echo '************************************************************'
+      echo '******** Installing Bluemix container-registry plugin ******'
+	  echo '************************************************************'
+      bx plugin install container-registry -r Bluemix
+    fi
+	echo '*#*#*#*#*#*#*#* Installation Process Compeleted. *#*#*#*#*#*'
+	echo 'Do Vagrant SSH and run the following commands '
+	echo 'mvn -version'
+	echo 'git -version'
+	echo 'docker -version'
+	echo 'bx  -version'
+	echo 'kubectl -version'
+	echo ' navigate to /vagrant_data to the project source files'	
+    SHELL
+  
 end
