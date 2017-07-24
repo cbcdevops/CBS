@@ -11,7 +11,7 @@ public class Application {
 
     @RequestMapping("/")
     public String home() {
-        return "Hi There!. This is CBS Service V1.0 here from BlueMix. I have two instance me running. I'm exposed via a Service.";
+        return "Hi There!. This is CBS Service 1.0 here from BlueMix. I have two instance of me running.";
     }
 
     public static void main(String[] args) {
