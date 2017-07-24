@@ -1,0 +1,15 @@
+apiVersion: v1
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ibmliberty-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: ibmliberty
+    spec:
+      containers:
+      - name: ibmliberty
+        image: registry.DomainName/ibmliberty
