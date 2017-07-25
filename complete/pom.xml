@@ -74,7 +74,7 @@
                         <configuration>
                             <tasks>
                                 <echo>Copyimf DockerFile</echo>
-                                <copy file="Dockerfile" tofile="${basedir}/target/Dockerfile"/>
+                                <copy file="${basedir}/docker/Dockerfile" tofile="${basedir}/target/Dockerfile"/>
                             </tasks>
                         </configuration>
                     </execution>
