@@ -11,7 +11,7 @@ public class Application {
 
     @RequestMapping("/")
     public String home() {
-        return "Hi There!. This is CBS Service 1.0 here from BlueMix. I have 2 instance of mine running in this Node. Morning Session";
+        return "Hi There!. This is Canal Barges first Microservice Service running in Kubernetes on BlueMix. I have two instance me running. I'm exposed via a MicroService.";
     }
 
     public static void main(String[] args) {
